@@ -100,10 +100,12 @@ const PHTAMListMain = () => {
                     });
                     setOrders(convertdata ? convertdata : []);
                     setSumDocuments(convertdata.length);
-                } else {
-                    alert("Đăng nhập thất bại");
                 }
             })
+            .catch(() => {
+                window.location.href = "/logout"
+            }
+            );
     }
 
     const onSuccess = () => {
