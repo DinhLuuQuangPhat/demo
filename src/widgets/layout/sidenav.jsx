@@ -25,9 +25,7 @@ export function Sidenav({ brandImg, brandName, routes }) {
     transparent: "bg-transparent",
   };
 
-  const [menuData, setMenuData] = useState();
-
-  useEffect()
+  const menuData = JSON.parse(localStorage.getItem("menuData"));
 
   return (
     <aside
