@@ -12,7 +12,6 @@ import {
 import MainButton from "../MainButton";
 import moment from "moment";
 import Flatpickr from "react-flatpickr";
-import axios from "axios";
 import api from "../api/api";
 import { apiUrl } from "@/constants";
 
