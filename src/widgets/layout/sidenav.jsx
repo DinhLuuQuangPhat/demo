@@ -8,8 +8,6 @@ import {
   IconButton,
   Typography,
 } from "@material-tailwind/react";
-import api from "@/components/api/api";
-import { apiUrl } from "@/constants";
 import { useMaterialTailwindController, setOpenSidenav } from "@/context";
 import { Sidebar } from 'flowbite-react';
 import { HiInbox } from 'react-icons/hi';
@@ -26,7 +24,6 @@ export function Sidenav({ brandImg, brandName, routes }) {
   };
 
   const menuData = JSON.parse(localStorage.getItem("menuData"));
-  console.log(JSON.parse(localStorage.getItem("menuData")));
 
   return (
     <aside
@@ -57,7 +54,7 @@ export function Sidenav({ brandImg, brandName, routes }) {
           <XMarkIcon strokeWidth={2.5} className="h-5 w-5 text-white" />
         </IconButton>
       </div>
-      {menuData !== null && (
+      {menuData !== "" && (
         <div className="m-4">
           <Sidebar aria-label="Sidebar with multi-level dropdown example">
             <Sidebar.ItemGroup>
