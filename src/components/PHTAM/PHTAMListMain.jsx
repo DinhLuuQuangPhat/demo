@@ -5,8 +5,6 @@ import { filterBy } from "@progress/kendo-data-query";
 import {
     Grid,
     GridColumn,
-    getSelectedState,
-    getSelectedStateFromKeyDown,
 } from "@progress/kendo-react-grid";
 import {
     MdAddCircleOutline,
