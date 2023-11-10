@@ -95,7 +95,7 @@ export function SignIn() {
           saveUserData(returnData.USERLGIN);
           saveCompany(returnData.COMPLIST[0]);
           getMenu();
-          window.location.href = "/";
+          window.location.href = "/"
         } else {
           alert("Đăng nhập thất bại");
         }

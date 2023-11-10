@@ -4,6 +4,7 @@ const Logout = () => {
   const clearData = () => {
     localStorage.removeItem("userData");
     localStorage.removeItem("locations");
+    localStorage.removeItem("menuData");
   };
   useEffect(() => {
     clearData();
