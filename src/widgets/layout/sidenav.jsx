@@ -26,6 +26,7 @@ export function Sidenav({ brandImg, brandName, routes }) {
   };
 
   const menuData = JSON.parse(localStorage.getItem("menuData"));
+  console.log(JSON.parse(localStorage.getItem("menuData")));
 
   return (
     <aside
@@ -56,7 +57,7 @@ export function Sidenav({ brandImg, brandName, routes }) {
           <XMarkIcon strokeWidth={2.5} className="h-5 w-5 text-white" />
         </IconButton>
       </div>
-      {menuData !== "" && (
+      {menuData !== null && (
         <div className="m-4">
           <Sidebar aria-label="Sidebar with multi-level dropdown example">
             <Sidebar.ItemGroup>
