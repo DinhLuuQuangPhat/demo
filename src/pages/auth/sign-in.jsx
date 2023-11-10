@@ -95,7 +95,7 @@ export function SignIn() {
           saveUserData(returnData.USERLGIN);
           saveCompany(returnData.COMPLIST[0]);
           getMenu();
-          window.location.href = "/"
+          window.location.href = "/";
         } else {
           alert("Đăng nhập thất bại");
         }
@@ -113,7 +113,7 @@ export function SignIn() {
       )
       .then((res) => {
         if (res.data.RETNDATA !== null) {
-          localStorage.setItem('menuData', res.data.RETNDATA)
+          localStorage.setItem('menuData', JSON.stringify(res.data.RETNDATA))
         }
       })
   }
