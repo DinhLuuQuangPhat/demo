@@ -42,6 +42,7 @@ export function Sidenav({ brandImg, brandName, routes }) {
           >
             {brandName}
           </Typography>
+          {/* <img src={brandImg} alt="" /> */}
         </Link>
         <IconButton
           variant="text"

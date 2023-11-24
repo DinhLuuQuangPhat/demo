@@ -69,7 +69,6 @@ const LHCVEditMain = (props) => {
         if (lienHeCongVu) {
             setHeader(lienHeCongVu !== undefined ? lienHeCongVu : initHeader);
         }
-        { console.log(header) }
     }, [lienHeCongVu]);
 
     useEffect(() => {

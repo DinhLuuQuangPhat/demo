@@ -34,9 +34,7 @@ const PHTAMEditMain = (props) => {
     const dispatch = useDispatch();
     const phieuTamUng = useSelector((state) => state.PHTAM.phieuTamUng);
     const postResult = useSelector((state) => state.PHTAM.postResult);
-    const lstmngSubDcmnPHTAM = useSelector(
-        (state) => state.COMMON.lstmngSubDcmnPHTAM
-    );
+    const lstmngSubDcmnPHTAM = useSelector((state) => state.COMMON.lstmngSubDcmnPHTAM);
     const lstCUOM = useSelector((state) => state.COMMON.lstCUOM);
     const lstmngAdvnType = useSelector((state) => state.COMMON.lstmngAdvnType);
     const lstAcctObjectMngr = useSelector((state) => state.COMMON.lstAcctObjectMngr);
@@ -82,6 +80,7 @@ const PHTAMEditMain = (props) => {
 
     useEffect(() => {
         if (phieuTamUng) {
+
             setHeader(phieuTamUng !== undefined ? phieuTamUng : initHeader);
         }
     }, [phieuTamUng]);
@@ -103,23 +102,26 @@ const PHTAMEditMain = (props) => {
     }, [postResult]);
 
     const handleAdd = () => {
-        var postJson = {
+        var body = {
             DCMNCODE: dcmncCode,
             HEADER: [header],
         };
-        dispatch(postPHTAM(postJson));
+        dispatch(postPHTAM(body));
     };
     const handleSave = () => {
-        var postJson = {
+        var body = {
             DCMNCODE: dcmncCode,
             HEADER: [header],
         };
-        dispatch(updatePHTAM(postJson));
+        dispatch(updatePHTAM(body));
     };
+
+    console.log('phieuTamUng', phieuTamUng)
+    console.log('header', header)
+
 
     return (
         <>
-            {console.log(header)}
             <div className={"p-3 flex justify-between items-center"}>
                 <div className="order-first flex items-center">
                     {/* Dau mui ten , event Click vao hien thi danh sach Luoi */}
@@ -131,7 +133,7 @@ const PHTAMEditMain = (props) => {
                     {/* Them moi */}
                     {props.mode === "ADD" && (
                         <MainButton
-                            title={"Thêm"}
+                            title={"Lưu"}
                             icon={<MdAddCircleOutline />}
                             customClick={handleAdd}
                             className="AddItem"

@@ -20,10 +20,10 @@ const PHTAMEdit = (props) => {
     }, [dispatch]);
     // Load chi tiết chứng tự
     useEffect(() => {
-        if (id !== undefined) {
-            dispatch(getDetailPHTAM(id));
-        } else {
+        if (id === undefined) {
             dispatch(resetPHTAM());
+        } else {
+            dispatch(getDetailPHTAM(id));
         }
     }, [dispatch, id]);
     return <PHTAMEditMain keycode={id} mode={props.mode} />;
