@@ -1,4 +1,4 @@
-export const baseUrl = "https://api-dev.firstems.net/"
+export const baseUrl = "http://api-dev.firstems.com/"
 
 export const apiUrl = {
 

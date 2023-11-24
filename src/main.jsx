@@ -15,6 +15,8 @@ import App from "./App";
 import { BrowserRouter } from "react-router-dom";
 import { ThemeProvider } from "@material-tailwind/react";
 import { MaterialTailwindControllerProvider } from "@/context";
+import { store } from "@/redux/store";
+import { Provider } from "react-redux";
 import "../public/css/tailwind.css";
 import "@progress/kendo-theme-default/dist/all.css";
 import "react-widgets/styles.css";
@@ -25,7 +27,9 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     <BrowserRouter>
       <ThemeProvider>
         <MaterialTailwindControllerProvider>
-          <App />
+          <Provider store={store}>
+            <App />
+          </Provider>
         </MaterialTailwindControllerProvider>
       </ThemeProvider>
     </BrowserRouter>

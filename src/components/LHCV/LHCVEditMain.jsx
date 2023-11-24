@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { TabStrip, TabStripTab } from "@progress/kendo-react-layout";
 import {
     Input,
@@ -16,13 +17,33 @@ import FieldEditMultiSelect from "../FieldEditMultiSelect";
 import FieldEditCombobox from "../FieldEditCombobox";
 import MainButton from "../MainButton";
 import { NavLink } from "react-router-dom";
-import api from "../api/api";
-import { apiUrl } from "@/constants";
+import {
+    postLHCV,
+    updateLHCV,
+    resetLHCV,
+} from "../../actions/lhcv";
 
 const dcmncCode = "LHCV";
 const userData = JSON.parse(localStorage.getItem("userData"));
 
 const LHCVEditMain = (props) => {
+
+    const dispatch = useDispatch();
+    const lienHeCongVu = useSelector((state) => state.LHCV.lienHeCongVu);
+    const postResult = useSelector((state) => state.LHCV.postResult);
+    const lstmngSubDcmnLHCV = useSelector(
+        (state) => state.COMMON.lstmngSubDcmnLHCV
+    );
+    const appEmplList = useSelector((state) => state.COMMON.appEmplList);
+    const [tabSelected, setTabSelected] = useState(0);
+    const [mode, setMode] = useState(props.mode === "ADD" ? true : false);
+
+    useEffect(() => {
+        if (props.mode === "ADD") {
+            setMode(true);
+        }
+    }, []);
+
     const initHeader = {
         LCTNCODE: userData.LCTNCODE,
         MAINCODE: "",
@@ -43,84 +64,36 @@ const LHCVEditMain = (props) => {
         KKKK0000: "",
         DCMNFILE: [],
     };
-    const [header, setHeader] = useState([initHeader]);
-    const [tabSelected, setTabSelected] = useState(0);
-    const [appEmplList, setAppEmplList] = useState([]);
-    const [lstmngSubDcmnLHCV, setlstmngSubDcmnLHCV] = useState([]);
-    const [mode, setMode] = props.mode === "ADD" ? useState(true) : useState(false);
-
-    const getData = async () => {
-        if (props.keycode != null) {
-            api(localStorage.getItem("usertoken"))
-                .post(apiUrl.detailData, {
-                    DCMNCODE: dcmncCode,
-                    KEY_CODE: props.keycode,
-                })
-                .then((res) => {
-                    if (res.data.RETNDATA !== null) {
-                        setHeader(res.data.RETNDATA)
-                    }
-                })
-                .catch((err) => {
-                    window.location.href = "/logout"
-                })
+    const [header, setHeader] = useState(initHeader);
+    useEffect(() => {
+        if (lienHeCongVu) {
+            setHeader(lienHeCongVu !== undefined ? lienHeCongVu : initHeader);
         }
-
-        //getlstmngSubDcmnLHCV
-        api(localStorage.getItem("usertoken"))
-            .post(apiUrl.listCommon, {
-                LISTCODE: "lstmngSub_Dcmn",
-                CONDFLTR: "DcmnCode='LHCV'",
-            })
-            .then((res) => {
-                if (res.data.RETNDATA !== null) {
-                    setlstmngSubDcmnLHCV(res.data.RETNDATA)
-                } else {
-                    setlstmngSubDcmnLHCV([])
-                }
-            })
-
-        //getappEmplList
-        api(localStorage.getItem("usertoken"))
-            .post(apiUrl.listCustomer, {
-                DCMNCODE: "appEmplList",
-                PARACODE: "001",
-                DPTMCODE: "%",
-                PSTNCODE: "%",
-                JOB_CODE: "%",
-                PSTNTYPE: 0,
-                JOB_TYPE: 0,
-            })
-            .then((res) => {
-                if (res.data.RETNDATA !== null) {
-                    setAppEmplList(res.data.RETNDATA)
-                } else {
-                    setAppEmplList([])
-                }
-            })
-    };
+    }, [lienHeCongVu]);
 
     useEffect(() => {
-        if (props.mode === "ADD") {
-            setMode(true);
+        if (postResult) {
+            if (postResult.RETNCODE) {
+                alert(postResult.RETNMSSG);
+                dispatch(resetLHCV());
+            }
         }
-    }, []);
+    }, [postResult]);
 
-    const [dataLoaded, setDataLoaded] = useState(false);
-
-    useEffect(() => {
-        const fetchData = async () => {
-            await getData();
-
-            setDataLoaded(true);
+    const handleAdd = () => {
+        var postJson = {
+            DCMNCODE: dcmncCode,
+            HEADER: [header],
         };
-
-        fetchData();
-    }, []);
-
-    if (!dataLoaded) {
-        return <div>Loading...</div>;
-    }
+        dispatch(postLHCV(postJson));
+    };
+    const handleSave = () => {
+        var postJson = {
+            DCMNCODE: dcmncCode,
+            HEADER: [header],
+        };
+        dispatch(updateLHCV(postJson));
+    };
 
     return (
         <>
@@ -135,11 +108,9 @@ const LHCVEditMain = (props) => {
                     {/* Them moi */}
                     {props.mode === "ADD" && (
                         <MainButton
-                            title={"Thêm mới"}
+                            title={"Thêm"}
                             icon={<MdAddCircleOutline />}
-                            customClick={() => {
-                                alert("Click thêm mới");
-                            }}
+                            customClick={handleAdd}
                             className="AddItem"
                         />
                     )}
@@ -159,9 +130,7 @@ const LHCVEditMain = (props) => {
                         <MainButton
                             title={"Lưu"}
                             icon={<MdAddCircleOutline />}
-                            customClick={() => {
-                                alert("Click lưu");
-                            }}
+                            customClick={handleSave}
                             className="AddItem"
                         />
                     )}
@@ -197,7 +166,7 @@ const LHCVEditMain = (props) => {
                                 </h4>
                                 <div className="font-semibold text-sm cursor-pointer text-white">
                                     <span className="text-red-600 rounded-md underline items-center italic">
-                                        {header[0].STTENAME}
+                                        {header.STTENAME}
                                     </span>
                                 </div>
                             </div>
@@ -224,7 +193,7 @@ const LHCVEditMain = (props) => {
                                                             id="MAINCODE"
                                                             name="MAINCODE"
                                                             style={{ borderColor: "grey" }}
-                                                            value={header[0]?.MAINCODE}
+                                                            value={header?.MAINCODE}
                                                             type="text"
                                                             disabled={true}
                                                             className="bg-white"
@@ -239,7 +208,7 @@ const LHCVEditMain = (props) => {
                                                         <DatePicker
                                                             format="dd/MM/yyyy"
                                                             weekNumber={true}
-                                                            defaultValue={new Date(header[0].MAINDATE)}
+                                                            defaultValue={new Date(header.MAINDATE)}
                                                             disabled
                                                             className="bg-white"
                                                         />
@@ -256,7 +225,7 @@ const LHCVEditMain = (props) => {
                                                             header !== undefined
                                                                 ? lstmngSubDcmnLHCV.find(
                                                                     (item) =>
-                                                                        item.ITEMCODE === header[0].DCMNSBCD
+                                                                        item.ITEMCODE === header.DCMNSBCD
                                                                 )
                                                                 : {}
                                                         }
@@ -281,7 +250,7 @@ const LHCVEditMain = (props) => {
                                                     <TextArea
                                                         className={`border-[#808080] border-[1px] bg-white`}
                                                         rows={2}
-                                                        value={header[0].MPURPNME}
+                                                        value={header.MPURPNME}
                                                         disabled={!mode}
                                                         onChange={(e) => {
                                                             setHeader({
@@ -300,7 +269,7 @@ const LHCVEditMain = (props) => {
                                                     <TextArea
                                                         className={`border-[#808080] border-[1px] bg-white`}
                                                         rows={2}
-                                                        value={header[0].MCONTENT}
+                                                        value={header.MCONTENT}
                                                         disabled={!mode}
                                                         onChange={(e) => {
                                                             setHeader({
@@ -321,9 +290,9 @@ const LHCVEditMain = (props) => {
                                                         id={"EMPLRECV"}
                                                         data={appEmplList}
                                                         defaultValue={
-                                                            header !== undefined
+                                                            header.EMPLRECV !== undefined
                                                                 ? appEmplList.filter((item) =>
-                                                                    header[0].EMPLRECV.includes(item.EMPLCODE)
+                                                                    header.EMPLRECV.includes(item.EMPLCODE)
                                                                 )
                                                                 : []
                                                         }
@@ -350,9 +319,9 @@ const LHCVEditMain = (props) => {
                                                         id={"EMPLREFR"}
                                                         data={appEmplList}
                                                         defaultValue={
-                                                            header !== undefined
+                                                            header.EMPLREFR !== undefined
                                                                 ? appEmplList.filter((item) =>
-                                                                    header[0].EMPLREFR.includes(item.EMPLCODE)
+                                                                    header.EMPLREFR.includes(item.EMPLCODE)
                                                                 )
                                                                 : []
                                                         }

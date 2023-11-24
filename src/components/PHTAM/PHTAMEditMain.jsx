@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { TabStrip, TabStripTab } from "@progress/kendo-react-layout";
 import {
     Input,
@@ -15,14 +16,41 @@ import FieldEditCombobox from "../FieldEditCombobox";
 import MainButton from "../MainButton";
 import { NavLink } from "react-router-dom";
 import FieldEditNumberic from "../FieldEditNumberic";
-import api from "../api/api";
-import { apiUrl } from "@/constants";
+import {
+    postPHTAM,
+    updatePHTAM,
+    resetPHTAM,
+} from "../../actions/phtam";
+import { getLstAccObjcCode } from "../../actions/common";
 
 
 const dcmncCode = "PHTAM";
 const userData = JSON.parse(localStorage.getItem("userData"));
 
 const PHTAMEditMain = (props) => {
+
+
+    const dispatch = useDispatch();
+    const phieuTamUng = useSelector((state) => state.PHTAM.phieuTamUng);
+    const postResult = useSelector((state) => state.PHTAM.postResult);
+    const lstmngSubDcmnPHTAM = useSelector(
+        (state) => state.COMMON.lstmngSubDcmnPHTAM
+    );
+    const lstCUOM = useSelector((state) => state.COMMON.lstCUOM);
+    const lstmngAdvnType = useSelector((state) => state.COMMON.lstmngAdvnType);
+    const lstAcctObjectMngr = useSelector((state) => state.COMMON.lstAcctObjectMngr);
+    const lstPymnType = useSelector((state) => state.COMMON.lstPymnType);
+    const lstAccObjcCode = useSelector((state) => state.COMMON.lstAccObjcCode);
+
+
+    const [tabSelected, setTabSelected] = useState(0);
+    const [mode, setMode] = props.mode === "ADD" ? useState(true) : useState(false);
+
+    useEffect(() => {
+        if (props.mode === "ADD") {
+            setMode(true);
+        }
+    }, []);
 
     const initHeader = {
         MAINDATE: moment(new Date()).format("YYYY-MM-DD"),
@@ -49,146 +77,47 @@ const PHTAMEditMain = (props) => {
         KKKK0000: "",
         DCMNFILE: [],
     };
-    const [header, setHeader] = useState([initHeader]);
-    const [tabSelected, setTabSelected] = useState(0);
-    const [DCMNSBCDList, setDCMNSBCDList] = useState([]);
-    const [CUOMCODEList, setCUOMCODEList] = useState([]);
-    const [OBJCTYPEList, setOBJCTYPEList] = useState([]);
-    const [ACOBCODEList, setACOBCODEList] = useState([]);
-    const [PYMNTYPEList, setPYMNTYPEList] = useState([]);
-    const [GRP_TYPEList, setGRP_TYPEList] = useState([]);
-    const [mode, setMode] = props.mode === "ADD" ? useState(true) : useState(false);
-
-    const getData = async () => {
-        if (props.keycode != null) {
-            api(localStorage.getItem("usertoken"))
-                .post(apiUrl.detailData, {
-                    DCMNCODE: dcmncCode,
-                    KEY_CODE: props.keycode,
-                })
-                .then((res) => {
-                    if (res.data.RETNDATA !== null) {
-                        setHeader(res.data.RETNDATA)
-                    }
-                })
-                .catch((err) => {
-                    window.location.href = "/logout"
-                })
-        }
-        // Lấy List DCMNSBCD
-        api(localStorage.getItem("usertoken"))
-            .post(apiUrl.listCommon, {
-                LISTCODE: "lstmngSub_Dcmn",
-                CONDFLTR: "DcmnCode='PHTAM'",
-            })
-            .then((res) => {
-                if (res.data.RETNDATA !== null) {
-                    setDCMNSBCDList(res.data.RETNDATA)
-                } else {
-                    setDCMNSBCDList([])
-                }
-            })
-
-        // Lấy List CUOMCODE
-        api(localStorage.getItem("usertoken"))
-            .post(apiUrl.listCommon, {
-                LISTCODE: "lstCUOM"
-            })
-            .then((res) => {
-                if (res.data.RETNDATA !== null) {
-                    setCUOMCODEList(res.data.RETNDATA)
-                } else {
-                    setCUOMCODEList([])
-                }
-            })
-
-        // Lấy List OBJCTYPE
-        api(localStorage.getItem("usertoken"))
-            .post(apiUrl.listCommon, {
-                LISTCODE: "lstmngAdvnType"
-            })
-            .then((res) => {
-                if (res.data.RETNDATA !== null) {
-                    setOBJCTYPEList(res.data.RETNDATA)
-                } else {
-                    setOBJCTYPEList([])
-                }
-            })
-
-        // Lấy List ACOBCODE
-        api(localStorage.getItem("usertoken"))
-            .post(apiUrl.listCommon, {
-                LISTCODE: "lstAcctObjectMngr",
-                CONDFLTR: "UsedStte>0",
-            })
-            .then((res) => {
-                if (res.data.RETNDATA !== null) {
-                    setACOBCODEList(res.data.RETNDATA)
-                } else {
-                    setACOBCODEList([])
-                }
-            })
-
-        // Lấy List PYMNTYPE
-        api(localStorage.getItem("usertoken"))
-            .post(apiUrl.listCommon, {
-                LISTCODE: "lstPymnType",
-                CONDFLTR: "PymnType in(1,8,1024)",
-            })
-            .then((res) => {
-                if (res.data.RETNDATA !== null) {
-                    setPYMNTYPEList(res.data.RETNDATA)
-                } else {
-                    setPYMNTYPEList([])
-                }
-            })
-
-    };
-    const getGRP_TYPEList = async () => {
-        api(localStorage.getItem("usertoken"))
-            .post(apiUrl.listObject, {
-                FUNCNAME: "spDtaLoadAccObjcCode_Srch_App",
-                DTBSNAME: "Common",
-                LCTNCODE: "{{0202}}",
-                PARA_001: "'1990-01-01', '1990-01-01'," + parseInt(header[0].GRP_TYPE) + ", ''",
-            })
-            .then((res) => {
-                if (res.data.RETNDATA !== null) {
-                    setGRP_TYPEList(res.data.RETNDATA)
-                } else {
-                    setGRP_TYPEList([])
-                }
-            })
-    };
-
-    const [dataLoaded, setDataLoaded] = useState(false);
+    const [header, setHeader] = useState(initHeader);
 
     useEffect(() => {
-        if (props.mode === "ADD") {
-            setMode(true);
+        if (phieuTamUng) {
+            setHeader(phieuTamUng !== undefined ? phieuTamUng : initHeader);
         }
+    }, [phieuTamUng]);
 
-        const fetchData = async () => {
-            await getData();
+    useEffect(() => {
+        if (header.GRP_TYPE) {
+            dispatch(getLstAccObjcCode(header.GRP_TYPE));
+        }
+    }, [header.GRP_TYPE]);
+
+    useEffect(() => {
+        if (postResult) {
+            if (postResult.RETNCODE) {
+                alert(postResult.RETNMSSG);
+                dispatch(resetPHTAM());
+            }
+        }
+    }, [postResult]);
+
+    const handleAdd = () => {
+        var postJson = {
+            DCMNCODE: dcmncCode,
+            HEADER: [header],
         };
-        fetchData();
-    }, []);
-
-    useEffect(() => {
-        if (header[0].KKKK0000 !== "" && props.mode === "EDIT") {
-            getGRP_TYPEList();
-            setDataLoaded(true);
-        } else {
-            setDataLoaded(true);
-        }
-    }, [header[0].KKKK0000])
-
-    if (!dataLoaded) {
-        return <div>Loading...</div>;
-    }
+        dispatch(postPHTAM(postJson));
+    };
+    const handleSave = () => {
+        var postJson = {
+            DCMNCODE: dcmncCode,
+            HEADER: [header],
+        };
+        dispatch(updatePHTAM(postJson));
+    };
 
     return (
         <>
+            {console.log(header)}
             <div className={"p-3 flex justify-between items-center"}>
                 <div className="order-first flex items-center">
                     {/* Dau mui ten , event Click vao hien thi danh sach Luoi */}
@@ -200,11 +129,9 @@ const PHTAMEditMain = (props) => {
                     {/* Them moi */}
                     {props.mode === "ADD" && (
                         <MainButton
-                            title={"Thêm mới"}
+                            title={"Thêm"}
                             icon={<MdAddCircleOutline />}
-                            customClick={() => {
-                                alert("Click thêm mới");
-                            }}
+                            customClick={handleAdd}
                             className="AddItem"
                         />
                     )}
@@ -224,9 +151,7 @@ const PHTAMEditMain = (props) => {
                         <MainButton
                             title={"Lưu"}
                             icon={<MdAddCircleOutline />}
-                            customClick={() => {
-                                alert("Click lưu");
-                            }}
+                            customClick={handleSave}
                             className="AddItem"
                         />
                     )}
@@ -262,7 +187,7 @@ const PHTAMEditMain = (props) => {
                                 </h4>
                                 <div className="font-semibold text-sm cursor-pointer text-white">
                                     <span className="text-red-600 rounded-md underline items-center italic">
-                                        {header[0].STTENAME}
+                                        {header.STTENAME}
                                     </span>
                                 </div>
                             </div>
@@ -289,7 +214,7 @@ const PHTAMEditMain = (props) => {
                                                             id="MAINCODE"
                                                             name="MAINCODE"
                                                             style={{ borderColor: "grey" }}
-                                                            value={header[0]?.MAINCODE}
+                                                            value={header?.MAINCODE}
                                                             type="text"
                                                             disabled={true}
                                                             className="bg-white"
@@ -304,7 +229,7 @@ const PHTAMEditMain = (props) => {
                                                         <DatePicker
                                                             format="dd/MM/yyyy"
                                                             weekNumber={true}
-                                                            defaultValue={new Date(header[0].MAINDATE)}
+                                                            defaultValue={new Date(header.MAINDATE)}
                                                             disabled
                                                             className="bg-white"
                                                         />
@@ -316,23 +241,24 @@ const PHTAMEditMain = (props) => {
                                                     <FieldEditCombobox
                                                         title={"Loại tạm ứng"}
                                                         id={"DCMNSBCD"}
-                                                        data={DCMNSBCDList}
+                                                        data={lstmngSubDcmnPHTAM}
                                                         defaultValue={
-                                                            DCMNSBCDList !== null
-                                                                ? DCMNSBCDList.find(
+                                                            header !== undefined
+                                                                ? lstmngSubDcmnPHTAM.find(
                                                                     (item) =>
-                                                                        item.ITEMCODE === header[0].DCMNSBCD
+                                                                        item.ITEMCODE === header.DCMNSBCD
                                                                 )
                                                                 : {}
                                                         }
                                                         textField="ITEMNAME"
                                                         dataItemKey="ITEMCODE"
                                                         onComboboxChange={(e) => {
-                                                            console.log(e.target.value.ITEMCODE);
+                                                            console.log("DCMNSBCD:" + e.target.value.ITEMCODE);
                                                             setHeader({
                                                                 ...header,
                                                                 DCMNSBCD: e.target.value.ITEMCODE,
                                                             });
+
                                                         }}
                                                         disabled={!mode}
                                                     />
@@ -341,21 +267,28 @@ const PHTAMEditMain = (props) => {
                                                 <div className="flex justify-between mb-3">
                                                     {/* Loại đối tượng */}
                                                     <div className="mr-1">
-
                                                         <FieldEditCombobox
                                                             title={"Loại đối tượng"}
                                                             id={"OBJCTYPE"}
-                                                            data={OBJCTYPEList}
+                                                            data={lstmngAdvnType}
                                                             defaultValue={
-                                                                OBJCTYPEList
-                                                                    ? OBJCTYPEList.find(
+                                                                header.OBJCTYPE !== undefined
+                                                                    ? lstmngAdvnType.find(
                                                                         (item) =>
-                                                                            item.ITEMCODE === header[0].OBJCTYPE.toString()
+                                                                            item.ITEMCODE === header.OBJCTYPE.toString()
                                                                     )
                                                                     : {}
                                                             }
                                                             textField="ITEMNAME"
                                                             dataItemKey="ITEMCODE"
+                                                            onComboboxChange={(e) => {
+                                                                console.log("OBJCTYPE:" + e.target.value.ITEMCODE);
+                                                                setHeader({
+                                                                    ...header,
+                                                                    OBJCTYPE: e.target.value.ITEMCODE,
+                                                                });
+
+                                                            }}
                                                             disabled={!mode}
                                                         />
                                                     </div>
@@ -365,17 +298,25 @@ const PHTAMEditMain = (props) => {
                                                         <FieldEditCombobox
                                                             title={"Đối tượng"}
                                                             id={"OBJCCODE"}
-                                                            data={GRP_TYPEList}
+                                                            data={lstAccObjcCode}
                                                             defaultValue={
-                                                                GRP_TYPEList
-                                                                    ? GRP_TYPEList.find(
+                                                                lstAccObjcCode
+                                                                    ? lstAccObjcCode.find(
                                                                         (item) =>
-                                                                            item.ITEMCODE === header[0].OBJCCODE
+                                                                            item.ITEMCODE === header.OBJCCODE
                                                                     )
                                                                     : {}
                                                             }
                                                             textField="ITEMSRCH"
                                                             dataItemKey="ITEMCODE"
+                                                            onComboboxChange={(e) => {
+                                                                console.log("OBJCCODE:" + e.target.value.ITEMCODE);
+                                                                setHeader({
+                                                                    ...header,
+                                                                    OBJCCODE: e.target.value.ITEMCODE,
+                                                                });
+
+                                                            }}
                                                             disabled={!mode}
                                                         />
                                                     </div>
@@ -389,17 +330,25 @@ const PHTAMEditMain = (props) => {
                                                                 <FieldEditCombobox
                                                                     title={"DV Tiền tệ"}
                                                                     id={"CUOMCODE"}
-                                                                    data={CUOMCODEList}
+                                                                    data={lstCUOM}
                                                                     defaultValue={
-                                                                        CUOMCODEList
-                                                                            ? CUOMCODEList.find(
+                                                                        lstCUOM
+                                                                            ? lstCUOM.find(
                                                                                 (item) =>
-                                                                                    item.ITEMCODE === header[0].CUOMCODE
+                                                                                    item.ITEMCODE === header.CUOMCODE
                                                                             )
                                                                             : {}
                                                                     }
                                                                     textField="ITEMNAME"
                                                                     dataItemKey="ITEMCODE"
+                                                                    onComboboxChange={(e) => {
+                                                                        console.log("CUOMCODE:" + e.target.value.ITEMCODE);
+                                                                        setHeader({
+                                                                            ...header,
+                                                                            CUOMCODE: e.target.value.ITEMCODE,
+                                                                        });
+
+                                                                    }}
                                                                     disabled={!mode}
                                                                 />
                                                             </div>
@@ -409,8 +358,17 @@ const PHTAMEditMain = (props) => {
                                                                 <FieldEditNumberic
                                                                     title={"Tỷ giá"}
                                                                     id={"CUOMRATE"}
-                                                                    value={header[0].CUOMRATE.toFixed(4) || ""}
+                                                                    value={
+                                                                        header.CUOMRATE !== undefined
+                                                                            ? header.CUOMRATE.toFixed(4)
+                                                                            : 0
+                                                                    }
                                                                     onChange={(e) => {
+                                                                        console.log("CUOMRATE:" + e.target.value);
+                                                                        setHeader({
+                                                                            ...header,
+                                                                            CUOMRATE: e.target.value,
+                                                                        });
                                                                     }}
                                                                     disabled={!mode}
                                                                 />
@@ -423,8 +381,17 @@ const PHTAMEditMain = (props) => {
                                                         <FieldEditNumberic
                                                             title={"Tiền tạm ứng"}
                                                             id={"ADVNCRAM"}
-                                                            value={header[0].ADVNCRAM || ""}
+                                                            value={
+                                                                header.ADVNCRAM !== undefined
+                                                                    ? header.ADVNCRAM
+                                                                    : 0
+                                                            }
                                                             onChange={(e) => {
+                                                                console.log("ADVNCRAM:" + e.target.value);
+                                                                setHeader({
+                                                                    ...header,
+                                                                    ADVNCRAM: e.target.value,
+                                                                });
                                                             }}
                                                             disabled={!mode}
                                                         />
@@ -437,8 +404,17 @@ const PHTAMEditMain = (props) => {
                                                         <FieldEditNumberic
                                                             title={"Số tiền đã nhận"}
                                                             id={"ACPTCRAM"}
-                                                            value={header[0].ACPTCRAM || ""}
+                                                            value={
+                                                                header.ACPTCRAM !== undefined
+                                                                    ? header.ACPTCRAM
+                                                                    : 0
+                                                            }
                                                             onChange={(e) => {
+                                                                console.log("ACPTCRAM:" + e.target.value);
+                                                                setHeader({
+                                                                    ...header,
+                                                                    ACPTCRAM: e.target.value,
+                                                                });
                                                             }}
                                                             disabled={!mode}
                                                         />
@@ -449,8 +425,17 @@ const PHTAMEditMain = (props) => {
                                                         <FieldEditNumberic
                                                             title={"Số tiền đã thanh toán"}
                                                             id={"ACPTCRAM"}
-                                                            value={header[0].ACPTCRAM || ""}
+                                                            value={
+                                                                header.ACPTCRAM !== undefined
+                                                                    ? header.ACPTCRAM
+                                                                    : 0
+                                                            }
                                                             onChange={(e) => {
+                                                                console.log("ACPTCRAM:" + e.target.value);
+                                                                setHeader({
+                                                                    ...header,
+                                                                    ACPTCRAM: e.target.value,
+                                                                });
                                                             }}
                                                             disabled={!mode}
                                                         />
@@ -490,17 +475,24 @@ const PHTAMEditMain = (props) => {
                                                     <FieldEditCombobox
                                                         title={"Phương thức thanh toán"}
                                                         id={"PYMNTYPE"}
-                                                        data={PYMNTYPEList}
+                                                        data={lstPymnType}
                                                         defaultValue={
-                                                            PYMNTYPEList
-                                                                ? PYMNTYPEList.find(
+                                                            header.PYMNTYPE !== undefined
+                                                                ? lstPymnType.find(
                                                                     (item) =>
-                                                                        item.ITEMCODE === header[0].PYMNTYPE.toString()
+                                                                        item.ITEMCODE === header.PYMNTYPE.toString()
                                                                 )
                                                                 : {}
                                                         }
                                                         textField="ITEMNAME"
                                                         dataItemKey="ITEMCODE"
+                                                        onComboboxChange={(e) => {
+                                                            console.log("PYMNTYPE:" + e.target.value.ITEMCODE);
+                                                            setHeader({
+                                                                ...header,
+                                                                PYMNTYPE: e.target.value.ITEMCODE,
+                                                            });
+                                                        }}
                                                         disabled={!mode}
                                                     />
                                                 </div>
@@ -510,12 +502,12 @@ const PHTAMEditMain = (props) => {
                                                     <FieldEditCombobox
                                                         title={"Dự án"}
                                                         id={"ACOBCODE"}
-                                                        data={ACOBCODEList}
+                                                        data={lstAcctObjectMngr}
                                                         defaultValue={
-                                                            ACOBCODEList
-                                                                ? ACOBCODEList.find(
+                                                            lstAcctObjectMngr
+                                                                ? lstAcctObjectMngr.find(
                                                                     (item) =>
-                                                                        item.ITEMCODE === header[0].ACOBCODE
+                                                                        item.ITEMCODE === header.ACOBCODE
                                                                 )
                                                                 : {}
                                                         }

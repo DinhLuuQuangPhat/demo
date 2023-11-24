@@ -1,5 +1,4 @@
-import React from "react";
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { filterBy } from "@progress/kendo-data-query";
 import {
@@ -10,10 +9,16 @@ import {
     MdAddCircleOutline,
 } from "react-icons/md";
 import MainButton from "../MainButton";
+import OrderListCommandCell from "../OrderListCommandCell";
 import moment from "moment";
 import Flatpickr from "react-flatpickr";
-import api from "../api/api";
-import { apiUrl } from "@/constants";
+import { useDispatch, useSelector } from "react-redux";
+import {
+    deletePHTAM,
+    getListPHTAM,
+    lockPHTAM,
+    resetPHTAM,
+} from "../../actions/phtam";
 
 const pageInit = {
     title: "Phiếu đề nghị tạm ứng",
@@ -25,7 +30,10 @@ const pageInit = {
 
 const PHTAMListMain = () => {
 
+    const dispath = useDispatch();
     const navigate = useNavigate();
+    const listDocuments = useSelector((state) => state.PHTAM.listPhieuTamUng);
+    const postResult = useSelector((state) => state.PHTAM.postResult);
     const [listVisiable, setListVisiable] = useState(true);
 
     var initDateFrom = new Date();
@@ -63,52 +71,78 @@ const PHTAMListMain = () => {
         );
     }
 
-    const getData = async () => {
-        api(localStorage.getItem("usertoken"))
-            .post(apiUrl.listData, {
-                DCMNCODE: pageInit.DCMNCODE,
-                STTESIGN: 7,
-                BEG_DATE:
-                    dateFrom.getFullYear() +
-                    "-" +
-                    ("0" + (dateFrom.getMonth() + 1)).slice(-2) +
-                    "-" +
-                    ("0" + dateFrom.getDate()).slice(-2),
-                END_DATE:
-                    dateTo.getFullYear() +
-                    "-" +
-                    ("0" + (dateTo.getMonth() + 1)).slice(-2) +
-                    "-" +
-                    ("0" + dateTo.getDate()).slice(-2),
-            })
-            .then((res) => {
-                if (res.data.RETNDATA !== null) {
-                    const listDocuments = res.data.RETNDATA;
-                    const convertdata = listDocuments.map((item) => {
-                        return {
-                            KKKK0000: item.KKKK0000,
-                            MAINCODE: item.MAINCODE,
-                            MAINDATE: new Date(item.MAINDATE),
-                            NOTETEXT: item.NOTETEXT,
-                            STTENAME: item.STTENAME,
-                            STTESIGN: item.STTESIGN,
-                            DCMNCODE: pageInit.DCMNCODE,
-                        };
-                    });
-                    setOrders(convertdata ? convertdata : []);
-                    setSumDocuments(convertdata.length);
-                }
-            })
-            .catch(() => {
-                window.location.href = "/logout"
-            }
-            );
-    }
+    const loadDataDocuments = () => {
+        const body = {
+            DCMNCODE: pageInit.DCMNCODE,
+            STTESIGN: 7,
+            BEG_DATE:
+                dateFrom.getFullYear() +
+                "-" +
+                ("0" + (dateFrom.getMonth() + 1)).slice(-2) +
+                "-" +
+                ("0" + dateFrom.getDate()).slice(-2),
+            END_DATE:
+                dateTo.getFullYear() +
+                "-" +
+                ("0" + (dateTo.getMonth() + 1)).slice(-2) +
+                "-" +
+                ("0" + dateTo.getDate()).slice(-2),
+        };
+        dispath(getListPHTAM(body));
+    };
 
+    useEffect(() => {
+        if (listDocuments && listDocuments.length > 0) {
+            const data = listDocuments.map((item) => {
+                return {
+                    KKKK0000: item.KKKK0000,
+                    MAINCODE: item.MAINCODE,
+                    MAINDATE: new Date(item.MAINDATE),
+                    NOTETEXT: item.NOTETEXT,
+                    STTENAME: item.STTENAME,
+                    STTESIGN: item.STTESIGN,
+                    DCMNCODE: pageInit.DCMNCODE,
+                };
+            });
+            setOrders(data ? data : []);
+            setSumDocuments(data.length);
+        }
+    }, [listDocuments]);
+
+    useEffect(() => {
+        if (postResult) {
+            if (postResult.RETNCODE) {
+                alert(postResult.RETNMSSG);
+                dispatch(resetPHTAM());
+            }
+        }
+    }, [postResult]);
     const onSuccess = () => {
         setListVisiable(true);
-        getData();
+        loadDataDocuments();
     };
+    const lockClick = (dataItem) => {
+        const body = {
+            DCMNCODE: pageInit.DCMNCODE,
+            KEY_CODE: dataItem.KKKK0000,
+        };
+        dispath(lockPHTAM(body));
+    };
+    const deleteClick = (dataItem) => {
+        const body = {
+            DCMNCODE: pageInit.DCMNCODE,
+            KEY_CODE: dataItem.KKKK0000,
+        };
+        dispath(deletePHTAM(body));
+    };
+
+    const CommandCell = (props) => (
+        <OrderListCommandCell
+            {...props}
+            lockClick={lockClick}
+            deleteClick={deleteClick}
+        />
+    );
 
     return (
         <>
@@ -219,6 +253,7 @@ const PHTAMListMain = () => {
                             width="200px"
                             filterable={false}
                             title={"Tác vụ"}
+                            cell={CommandCell}
                         />
                     </Grid>
                 </div>

@@ -10,7 +10,7 @@ import {
   Button,
   Typography,
 } from "@material-tailwind/react";
-import api from "@/components/api/api";
+import api from "@/api";
 import { apiUrl, firstToken } from "@/constants";
 import DropdownList from "react-widgets/DropdownList";
 
