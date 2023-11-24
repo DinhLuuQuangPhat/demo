@@ -69,6 +69,7 @@ const LHCVEditMain = (props) => {
         if (lienHeCongVu) {
             setHeader(lienHeCongVu !== undefined ? lienHeCongVu : initHeader);
         }
+        { console.log(header) }
     }, [lienHeCongVu]);
 
     useEffect(() => {
@@ -76,6 +77,7 @@ const LHCVEditMain = (props) => {
             if (postResult.RETNCODE) {
                 alert(postResult.RETNMSSG);
                 dispatch(resetLHCV());
+                window.location.reload();
             }
         }
     }, [postResult]);

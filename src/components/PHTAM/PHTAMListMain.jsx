@@ -30,7 +30,7 @@ const pageInit = {
 
 const PHTAMListMain = () => {
 
-    const dispath = useDispatch();
+    const dispatch = useDispatch();
     const navigate = useNavigate();
     const listDocuments = useSelector((state) => state.PHTAM.listPhieuTamUng);
     const postResult = useSelector((state) => state.PHTAM.postResult);
@@ -88,7 +88,7 @@ const PHTAMListMain = () => {
                 "-" +
                 ("0" + dateTo.getDate()).slice(-2),
         };
-        dispath(getListPHTAM(body));
+        dispatch(getListPHTAM(body));
     };
 
     useEffect(() => {
@@ -114,6 +114,7 @@ const PHTAMListMain = () => {
             if (postResult.RETNCODE) {
                 alert(postResult.RETNMSSG);
                 dispatch(resetPHTAM());
+                window.location.reload();
             }
         }
     }, [postResult]);
@@ -126,14 +127,14 @@ const PHTAMListMain = () => {
             DCMNCODE: pageInit.DCMNCODE,
             KEY_CODE: dataItem.KKKK0000,
         };
-        dispath(lockPHTAM(body));
+        dispatch(lockPHTAM(body));
     };
     const deleteClick = (dataItem) => {
         const body = {
             DCMNCODE: pageInit.DCMNCODE,
             KEY_CODE: dataItem.KKKK0000,
         };
-        dispath(deletePHTAM(body));
+        dispatch(deletePHTAM(body));
     };
 
     const CommandCell = (props) => (

@@ -29,7 +29,7 @@ const pageInit = {
 };
 const LHCVListMain = () => {
 
-    const dispath = useDispatch();
+    const dispatch = useDispatch();
     const navigate = useNavigate();
     const listDocuments = useSelector((state) => state.LHCV.listLienHeCongVu);
     const postResult = useSelector((state) => state.LHCV.postResult);
@@ -87,7 +87,7 @@ const LHCVListMain = () => {
                 "-" +
                 ("0" + dateTo.getDate()).slice(-2),
         };
-        dispath(getListLHCV(body));
+        dispatch(getListLHCV(body));
     };
 
     useEffect(() => {
@@ -112,6 +112,7 @@ const LHCVListMain = () => {
             if (postResult.RETNCODE) {
                 alert(postResult.RETNMSSG);
                 dispatch(resetLHCV());
+                window.location.reload();
             }
         }
     }, [postResult]);
@@ -124,14 +125,14 @@ const LHCVListMain = () => {
             DCMNCODE: pageInit.DCMNCODE,
             KEY_CODE: dataItem.KKKK0000,
         };
-        dispath(lockLHCV(body));
+        dispatch(lockLHCV(body));
     };
     const deleteClick = (dataItem) => {
         const body = {
             DCMNCODE: pageInit.DCMNCODE,
             KEY_CODE: dataItem.KKKK0000,
         };
-        dispath(deleteLHCV(body));
+        dispatch(deleteLHCV(body));
     };
 
     const CommandCell = (props) => (

@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { TabStrip, TabStripTab } from "@progress/kendo-react-layout";
 import {
     Input,
+    TextArea,
 } from "@progress/kendo-react-inputs";
 import {
     MdAddCircleOutline,
@@ -96,6 +97,7 @@ const PHTAMEditMain = (props) => {
             if (postResult.RETNCODE) {
                 alert(postResult.RETNMSSG);
                 dispatch(resetPHTAM());
+                window.location.reload();
             }
         }
     }, [postResult]);
@@ -286,6 +288,7 @@ const PHTAMEditMain = (props) => {
                                                                 setHeader({
                                                                     ...header,
                                                                     OBJCTYPE: e.target.value.ITEMCODE,
+                                                                    GRP_TYPE: e.target.value.ITEMATTR,
                                                                 });
 
                                                             }}
@@ -358,11 +361,7 @@ const PHTAMEditMain = (props) => {
                                                                 <FieldEditNumberic
                                                                     title={"Tỷ giá"}
                                                                     id={"CUOMRATE"}
-                                                                    value={
-                                                                        header.CUOMRATE !== undefined
-                                                                            ? header.CUOMRATE.toFixed(4)
-                                                                            : 0
-                                                                    }
+                                                                    value={header.CUOMRATE ? header.CUOMRATE : 1}
                                                                     onChange={(e) => {
                                                                         console.log("CUOMRATE:" + e.target.value);
                                                                         setHeader({
@@ -370,6 +369,7 @@ const PHTAMEditMain = (props) => {
                                                                             CUOMRATE: e.target.value,
                                                                         });
                                                                     }}
+                                                                    format="n4"
                                                                     disabled={!mode}
                                                                 />
                                                             </div>
@@ -381,11 +381,7 @@ const PHTAMEditMain = (props) => {
                                                         <FieldEditNumberic
                                                             title={"Tiền tạm ứng"}
                                                             id={"ADVNCRAM"}
-                                                            value={
-                                                                header.ADVNCRAM !== undefined
-                                                                    ? header.ADVNCRAM
-                                                                    : 0
-                                                            }
+                                                            value={header.ADVNCRAM ? header.ADVNCRAM : 1}
                                                             onChange={(e) => {
                                                                 console.log("ADVNCRAM:" + e.target.value);
                                                                 setHeader({
@@ -404,11 +400,7 @@ const PHTAMEditMain = (props) => {
                                                         <FieldEditNumberic
                                                             title={"Số tiền đã nhận"}
                                                             id={"ACPTCRAM"}
-                                                            value={
-                                                                header.ACPTCRAM !== undefined
-                                                                    ? header.ACPTCRAM
-                                                                    : 0
-                                                            }
+                                                            value={header.ACPTCRAM ? header.ACPTCRAM : 1}
                                                             onChange={(e) => {
                                                                 console.log("ACPTCRAM:" + e.target.value);
                                                                 setHeader({
@@ -425,11 +417,7 @@ const PHTAMEditMain = (props) => {
                                                         <FieldEditNumberic
                                                             title={"Số tiền đã thanh toán"}
                                                             id={"ACPTCRAM"}
-                                                            value={
-                                                                header.ACPTCRAM !== undefined
-                                                                    ? header.ACPTCRAM
-                                                                    : 0
-                                                            }
+                                                            value={header.ACPTCRAM ? header.ACPTCRAM : 1}
                                                             onChange={(e) => {
                                                                 console.log("ACPTCRAM:" + e.target.value);
                                                                 setHeader({
@@ -514,6 +502,25 @@ const PHTAMEditMain = (props) => {
                                                         textField="ITEMNAME"
                                                         dataItemKey="ITEMCODE"
                                                         disabled={!mode}
+                                                    />
+                                                </div>
+
+                                                {/* Nội dung tạm ứng */}
+                                                <div className="mb-3">
+                                                    <Label className="text-sm text-gray-500">
+                                                        {" Nội dung tạm ứng"}
+                                                    </Label>
+                                                    <TextArea
+                                                        className={`border-[#808080] border-[1px] bg-white`}
+                                                        rows={2}
+                                                        value={header.MEXLNNTE}
+                                                        disabled={!mode}
+                                                        onChange={(e) => {
+                                                            setHeader({
+                                                                ...header,
+                                                                MEXLNNTE: e.target.value,
+                                                            });
+                                                        }}
                                                     />
                                                 </div>
                                             </div>
